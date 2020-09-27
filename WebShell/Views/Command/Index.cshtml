@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Привет</h1>
+    <div class="mycontainer" style=" min-width: 16rem; max-width: 30rem;  margin-right: auto;  margin-left: auto;">
+        <form method="post" action="api/updates/complex">
+            <div class="form-group">
+                <label for="InputFormTextarea">Введите команду </label>
+                <textarea class="form-control" id="InputFormTextarea" rows="3" data-index=""></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" id= "runclick" onclick="SendCommand()">Погнали!</button>
+            </div>
+            <div class="form-group">
+                <label for="OutputFormTextBox">Результат</label>
+                <textarea readonly  class="form-control" id="OutputFormTextBox"  rows="5" style="background-color: #fff" ></textarea>
+            </div>
+        </form>
+        <script>
+            function SendCommand() {
+                debugger;
+                var formData = document.getElementById("InputFormTextarea").value;
+                var article = document.getElementById('InputFormTextarea');
+                $('#runclick').attr('disabled', true);
+                $.ajax({
+                    
+                    type: "POST",
+                    url: "Command/CreateCommandPowerShell",
+                    data: { TextCommand: formData },
+                    success: function (response) {
+                        
+                        $('#OutputFormTextBox').html(response.responseCommand);
+                        article.dataset.index = response.id;
+                        $('#runclick').attr('disabled', false);
+
+                    },
+                    error: function () {
+                        alert('Ошибка! Что-то пошло не так в выполнении команды');
+                    }
+                   
+                });
+
+            };
+        </script>
+        <script>
+            $("#InputFormTextarea").keydown(function (event) {
+                debugger;
+                var article = document.getElementById('InputFormTextarea');
+                var index = article.dataset.index;
+                if (event.keyCode == 38 && index > 1) {
+                $.ajax({
+                        type: "GET",
+                        url: "Command/ScrollUp",
+                        data: { index: index },
+                        success: function (response) {
+                            var text = response.textCommand;
+                            var id = response.id;
+                            $('#InputFormTextarea').val(text);
+                            article.dataset.index = id;
+                    },
+                    error: function () {
+                        alert('Ошибка! Не удалось получить команду ');
+                    }
+                    });
+                }
+                if (event.keyCode == 40) {
+                $.ajax({
+                        type: "GET",
+                        url: "Command/ScrollDown",
+                        data: { index: index },
+                        success: function (response) {
+                            var text = response.textCommand;
+                            var id = response.id;
+                            $('#InputFormTextarea').val(text);
+                            article.dataset.index = id;
+                    },
+                    error: function () {
+                        alert('Ошибка! Не удалось получить команду ');
+                    }
+                    });
+                }
+            });
+        </script>
+        <script> $(document).ready(function () {
+     var article = document.getElementById('InputFormTextarea');
+     debugger;
+      $.ajax({
+         type: "GET",
+         url: "Command/GetCommandId",
+          success: function (response) {
+              var a = response;
+             article.dataset.index = a;
+          },
+          error: function () {
+              alert('Ошибка! Не удалось получить команду');
+          }
+     });
+            });
+</script>
+       
+
+
+    </div>
